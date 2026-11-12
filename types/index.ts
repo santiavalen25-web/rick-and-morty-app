@@ -1,46 +1,22 @@
-// types/index.ts
-
-export interface Info {
-  count: number;
-  pages: number;
-  next: string | null;
-  prev: string | null;
-}
-
-export interface Character {
+export interface IndustrialItem {
   id: number;
   name: string;
-  status: 'Alive' | 'Dead' | 'unknown';
-  species: string;
-  type: string;
-  gender: 'Female' | 'Male' | 'Genderless' | 'unknown';
-  image: string;
-  url: string;
-  created: string;
+  category: "Bandas PVC / PU" | "Bandas de Caucho" | "Bandas Modulares" | "Rodillos y Accesorios" | "Servicios en Planta";
+  industry: string;
+  status: "Disponible en Stock" | "Fabricación a Medida" | "Servicio 24/7";
+  thickness: string;
+  tempRange: string;
+  spliceType: string;
+  description: string;
+  features: string[];
+  icon: string;
 }
 
-export interface CharacterResponse {
-  info: Info;
-  results: Character[];
-}
-// types/index.ts
-
-export interface Episode {
+export interface CaseStudy {
   id: number;
-  name: string;
-  air_date: string;
-  episode: string;
-  characters: string[];
-  url: string;
-  created: string;
-}
-
-export interface EpisodeResponse {
-  info: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-  results: Episode[];
+  title: string;
+  clientSector: string;
+  location: string;
+  solution: string;
+  resultMetric: string;
 }

@@ -1,78 +1,73 @@
-// components/SearchFilters.tsx
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 
-export default function SearchFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // Leemos directamente de la URL, esto será nuestra única fuente de la verdad
-  const defaultName = searchParams.get("name") || "";
-  const defaultStatus = searchParams.get("status") || "";
+interface SearchFiltersProps {
+  search: string;
+  setSearch: (v: string) => void;
+  category: string;
+  setCategory: (v: string) => void;
+  industry: string;
+  setIndustry: (v: string) => void;
+}
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Extraemos los datos nativos del formulario sin usar useState
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const status = formData.get("status") as string;
-    
-    const params = new URLSearchParams();
-    if (name) params.set("name", name);
-    if (status) params.set("status", status);
-    
-    // Actualizamos la URL (esto dispara la nueva petición al servidor)
-    router.push(`/characters?${params.toString()}`);
-  };
-
-  const handleClear = () => {
-    router.push("/characters");
-  };
-
+export default function SearchFilters({
+  search,
+  setSearch,
+  category,
+  setCategory,
+  industry,
+  setIndustry,
+}: SearchFiltersProps) {
   return (
-    <form 
-      onSubmit={handleSearch} 
-      className="flex flex-col sm:flex-row gap-4 mb-8 bg-white p-4 rounded-xl shadow-md border border-slate-200"
-    >
-      <input
-        type="text"
-        name="name"
-        defaultValue={defaultName}
-        placeholder="Buscar personaje (presiona Enter)..."
-        className="flex-grow border border-slate-300 rounded-lg px-4 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-      />
-      
-      <select
-        name="status"
-        defaultValue={defaultStatus}
-        // Magia aquí: envía el formulario automáticamente al cambiar la opción
-        onChange={(e) => e.target.form?.requestSubmit()} 
-        className="border border-slate-300 rounded-lg px-4 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
-      >
-        <option value="">Todos los estados</option>
-        <option value="alive">Vivo</option>
-        <option value="dead">Muerto</option>
-        <option value="unknown">Desconocido</option>
-      </select>
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">
+          Buscar Banda, Rodillo o Servicio
+        </label>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Ej. PVC, Caucho EP-400, Vulcanizado, Rodillos..."
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+        />
+      </div>
 
-      <button 
-        type="submit" 
-        className="bg-green-500 hover:bg-green-600 text-slate-900 font-bold py-2 px-6 rounded-lg transition-colors"
-      >
-        Buscar
-      </button>
-      
-      {(defaultName || defaultStatus) && (
-        <button 
-          type="button" 
-          onClick={handleClear}
-          className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-6 rounded-lg transition-colors"
+      <div>
+        <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">
+          Categoría Técnica
+        </label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
         >
-          Limpiar
-        </button>
-      )}
-    </form>
+          <option value="">Todas las Categorías</option>
+          <option value="Bandas PVC / PU">Bandas Sanitarias PVC / PU</option>
+          <option value="Bandas de Caucho">Bandas de Caucho Trabajo Pesado</option>
+          <option value="Bandas Modulares">Bandas Modulares Plásticas</option>
+          <option value="Rodillos y Accesorios">Rodillos, Poleas y Grapas</option>
+          <option value="Servicios en Planta">Vulcanizado y Mantenimiento 24/7</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">
+          Sector Industrial
+        </label>
+        <select
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+        >
+          <option value="">Todas las Industrias</option>
+          <option value="Alimentos">Alimentos y Farmacéutica</option>
+          <option value="Logística">Logística y Embotelladoras</option>
+          <option value="Canteras">Canteras y Minería</option>
+          <option value="Todas">Servicios Multi-Industria</option>
+        </select>
+      </div>
+    </div>
   );
 }

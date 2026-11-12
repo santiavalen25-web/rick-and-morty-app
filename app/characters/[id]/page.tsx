@@ -1,58 +1,124 @@
-// app/characters/[id]/page.tsx
+"use client";
+
+import React from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getCharacterById } from "../../../services/api";
+import { getCatalogItemById } from "@/services/api";
+import { useFavorites } from "@/context/FavoritesContext";
+import { WHATSAPP_NUMBER } from "@/components/Navbar";
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
+export default function ProductDetailPage() {
+  const params = useParams();
+  const id = Number(params?.id);
+  const item = getCatalogItemById(id);
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
-export default async function CharacterDetailPage({ params }: Props) {
-  // Obtenemos el ID de la URL
-  const { id } = await params;
-  const character = await getCharacterById(id);
+  if (!item) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
+        <h2 className="text-xl font-bold text-white">Especificación no encontrada</h2>
+        <Link href="/characters" className="text-emerald-400 underline text-sm mt-3 inline-block">
+          Volver al catálogo técnico
+        </Link>
+      </div>
+    );
+  }
+
+  const fav = isFavorite(item.id);
+
+  const sendDirectQuote = () => {
+    const msg = encodeURIComponent(
+      "Hola *Bandas & Soluciones*, solicito cotización técnica formal de:\n• *Ítem:* " +
+        item.name +
+        "\n• *Categoría:* " +
+        item.category +
+        "\n• *Espesor/Medida:* " +
+        item.thickness +
+        "\n• *Tipo de Empalme:* " +
+        item.spliceType
+    );
+    window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + msg, "_blank");
+  };
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col gap-6">
-      {/* Botón para regresar */}
-      <Link 
-        href="/characters" 
-        className="text-sm font-semibold text-green-600 hover:text-green-700 flex items-center gap-2 w-fit"
-      >
-        ← Volver a Personajes
+    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-10 shadow-xl">
+      <Link href="/characters" className="text-xs font-bold text-sky-400 hover:underline">
+        ← Volver al Catálogo de Materiales
       </Link>
 
-      {/* Tarjeta Detallada */}
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src={character.image} 
-          alt={character.name} 
-          className="w-full md:w-80 h-80 object-cover"
-        />
-        
-        <div className="p-6 md:p-8 flex flex-col justify-between gap-4 flex-grow">
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-4 pb-6 border-b border-slate-800">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-4xl">
+            {item.icon}
+          </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{character.name}</h1>
-            <p className="text-base font-medium text-slate-600 flex items-center mb-6">
-              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
-                character.status === 'Alive' ? 'bg-green-500' : 
-                character.status === 'Dead' ? 'bg-red-500' : 'bg-slate-400'
-              }`}></span>
-              {character.status} - {character.species}
-            </p>
-
-            <div className="space-y-3 border-t border-slate-100 pt-4 text-sm">
-              <div>
-                <span className="text-slate-400 font-semibold block">Género:</span>
-                <span className="text-slate-800 font-medium">{character.gender}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-semibold block">Tipo:</span>
-                <span className="text-slate-800 font-medium">{character.type || "Desconocido / Estándar"}</span>
-              </div>
-            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              {item.category}
+            </span>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2">{item.name}</h1>
           </div>
         </div>
+
+        <button
+          onClick={() => (fav ? removeFavorite(item.id) : addFavorite(item))}
+          className={
+            "px-4 py-2.5 rounded-xl text-xs font-bold border cursor-pointer " +
+            (fav
+              ? "bg-amber-500/20 border-amber-400 text-amber-300"
+              : "bg-slate-800 border-slate-700 text-slate-200")
+          }
+        >
+          {fav ? "⭐ Guardado en Planta" : "☆ Guardar en Favoritos"}
+        </button>
+      </div>
+
+      <p className="text-slate-300 text-base leading-relaxed mt-6">{item.description}</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <span className="text-xs text-slate-400 block">Industria Recomendada</span>
+          <span className="text-sm font-bold text-white">{item.industry}</span>
+        </div>
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <span className="text-xs text-slate-400 block">Espesor / Dimensiones</span>
+          <span className="text-sm font-bold text-sky-400">{item.thickness}</span>
+        </div>
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <span className="text-xs text-slate-400 block">Rango de Temperatura</span>
+          <span className="text-sm font-bold text-white">{item.tempRange}</span>
+        </div>
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+          <span className="text-xs text-slate-400 block">Método de Empalme</span>
+          <span className="text-sm font-bold text-emerald-400">{item.spliceType}</span>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
+          Características Técnicas y Ventajas Operativas
+        </h3>
+        <ul className="space-y-2">
+          {item.features.map((f, i) => (
+            <li key={i} className="text-sm text-slate-300 flex items-center gap-2">
+              <span className="text-emerald-400">✔</span> {f}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-800">
+        <button
+          onClick={sendDirectQuote}
+          className="flex-1 py-3.5 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm cursor-pointer"
+        >
+          💬 Cotizar este Material por WhatsApp
+        </button>
+        <Link
+          href="/episodes"
+          className="py-3.5 px-6 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold text-sm text-center"
+        >
+          📸 Ir al Cotizador con Foto y GPS
+        </Link>
       </div>
     </div>
   );

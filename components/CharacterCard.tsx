@@ -1,82 +1,97 @@
-// components/CharacterCard.tsx
 "use client";
 
-import Image from "next/image";
+import React from "react";
 import Link from "next/link";
-import { useFavorites } from "../context/FavoritesContext";
-import { Character } from "../types";
+import { IndustrialItem } from "@/types";
+import { useFavorites } from "@/context/FavoritesContext";
+import { WHATSAPP_NUMBER } from "./Navbar";
 
-interface Props {
-  character: Character;
-}
+export default function CharacterCard({ character }: { character: IndustrialItem }) {
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const fav = isFavorite(character.id);
 
-export default function CharacterCard({ character }: Props) {
-  const { addFavorite, removeFavorite, isFavorite } = useFavorites();
-  const favorite = isFavorite(character.id);
+  const toggleFav = () => {
+    if (fav) removeFavorite(character.id);
+    else addFavorite(character);
+  };
 
-  const toggleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault(); // Evita navegar a la página de detalle al hacer clic en el corazón
-    if (favorite) {
-      removeFavorite(character.id);
-    } else {
-      addFavorite(character);
-    }
+  const quoteViaWhatsApp = () => {
+    const msg = encodeURIComponent(
+      "Hola *Bandas & Soluciones*, me interesa cotizar el siguiente ítem del catálogo:\n\n• *Producto/Servicio:* " +
+        character.name +
+        "\n• *Categoría:* " +
+        character.category +
+        "\n• *Aplicación:* " +
+        character.industry +
+        "\n\nQuedo atento a su asesoría técnica."
+    );
+    window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + msg, "_blank");
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-slate-100 flex flex-col justify-between relative group">
-      {/* Botón de Favorito */}
-      <button
-        onClick={toggleFavorite}
-        aria-label="Guardar en favoritos"
-        className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-md hover:bg-white transition-all transform active:scale-95"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill={favorite ? "#ef4444" : "none"}
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke={favorite ? "#ef4444" : "#64748b"}
-          className="w-6 h-6 transition-colors"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-          />
-        </svg>
-      </button>
-
-      <Link href={`/characters/${character.id}`}>
-        <div className="relative w-full h-64">
-          <Image
-            src={character.image}
-            alt={character.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+    <div className="bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30">
+            {character.category}
+          </span>
+          <button
+            onClick={toggleFav}
+            className={
+              "px-3 py-1 rounded-xl text-xs font-bold border transition cursor-pointer " +
+              (fav
+                ? "bg-amber-500/20 border-amber-400 text-amber-300"
+                : "bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500")
+            }
+          >
+            {fav ? "⭐ Guardado" : "☆ Guardar"}
+          </button>
         </div>
-        <div className="p-4">
-          <h2 className="text-xl font-bold text-slate-800 line-clamp-1">
-            {character.name}
-          </h2>
-          <div className="flex items-center gap-2 mt-2 text-sm text-slate-600">
-            <span
-              className={`w-3 h-3 rounded-full ${
-                character.status === "Alive"
-                  ? "bg-green-500"
-                  : character.status === "Dead"
-                  ? "bg-red-500"
-                  : "bg-gray-400"
-              }`}
-            />
-            <span>
-              {character.status} - {character.species}
-            </span>
+
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl shrink-0">
+            {character.icon}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-white leading-snug">{character.name}</h3>
+            <p className="text-xs text-emerald-400 font-semibold mt-0.5">
+              🏭 Sector: {character.industry}
+            </p>
           </div>
         </div>
-      </Link>
+
+        <p className="text-sm text-slate-300 mb-4 line-clamp-3">{character.description}</p>
+
+        <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 text-xs space-y-1.5 mb-4">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Espesor / Medida:</span>
+            <span className="text-slate-200 font-semibold">{character.thickness}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Empalme:</span>
+            <span className="text-slate-200 font-semibold truncate max-w-[180px]">{character.spliceType}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Disponibilidad:</span>
+            <span className="text-emerald-400 font-bold">{character.status}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+        <Link
+          href={"/characters/" + character.id}
+          className="text-center py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition"
+        >
+          📄 Ver Ficha Técnica
+        </Link>
+        <button
+          onClick={quoteViaWhatsApp}
+          className="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition cursor-pointer"
+        >
+          💬 Cotizar Ahora
+        </button>
+      </div>
     </div>
   );
 }
